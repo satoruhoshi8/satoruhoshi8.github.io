@@ -31,6 +31,7 @@ const periodTimeSizeInputs = {
 };
 const showIconsShowInput = document.getElementById("show-icons-show");
 const showIconsHideInput = document.getElementById("show-icons-hide");
+const tableSizeToggleBtn = document.getElementById("table-size-toggle-btn");
 const universityBtnLabel = document.getElementById("university-btn-label");
 
 const periodTimeModalOverlay = document.getElementById("period-time-modal-overlay");
@@ -197,6 +198,7 @@ const DEFAULT_UI_SETTINGS = {
   attendanceSize: "medium",
   periodTimeSize: "medium",
   showIcons: true,
+  tableSize: "large",
 };
 let uiSettings = { ...DEFAULT_UI_SETTINGS };
 
@@ -343,6 +345,7 @@ function sanitizeUiSettings(raw) {
       ? raw.periodTimeSize
       : legacyMetricSize || DEFAULT_UI_SETTINGS.periodTimeSize,
     showIcons: typeof raw.showIcons === "boolean" ? raw.showIcons : DEFAULT_UI_SETTINGS.showIcons,
+    tableSize: raw.tableSize === "compact" ? "compact" : DEFAULT_UI_SETTINGS.tableSize,
   };
 }
 
@@ -1757,6 +1760,11 @@ function applyShowIcons(show) {
   document.body.dataset.showIcons = show ? "show" : "hide";
 }
 
+function applyTableSize(size) {
+  document.body.dataset.tableSize = size;
+  tableSizeToggleBtn.textContent = size === "compact" ? "拡大" : "全体を表示";
+}
+
 function renderThemeSwatches() {
   themeSwatchRow.innerHTML = "";
   Object.keys(THEME_PRESETS).forEach((key) => {
@@ -1808,6 +1816,7 @@ function applyAllSettingsToUi() {
   applyAttendanceSize(uiSettings.attendanceSize);
   applyPeriodTimeSize(uiSettings.periodTimeSize);
   applyShowIcons(uiSettings.showIcons);
+  applyTableSize(uiSettings.tableSize);
   renderThemeSwatches();
   renderFontOptions();
   timeFormat24Input.checked = uiSettings.timeFormat === "24";
@@ -1867,6 +1876,12 @@ showIconsHideInput.addEventListener("change", () => {
   if (!showIconsHideInput.checked) return;
   uiSettings.showIcons = false;
   applyShowIcons(false);
+  saveState();
+});
+
+tableSizeToggleBtn.addEventListener("click", () => {
+  uiSettings.tableSize = uiSettings.tableSize === "compact" ? "large" : "compact";
+  applyTableSize(uiSettings.tableSize);
   saveState();
 });
 

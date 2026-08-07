@@ -48,7 +48,7 @@ body {
 }
 
 .app {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -210,22 +210,23 @@ th, td {
 thead th {
   background: color-mix(in srgb, var(--color-primary) 35%, white);
   color: var(--color-primary-dark);
-  padding: 10px 0;
+  padding: 14px 0;
   font-weight: 700;
+  font-size: 17px;
   letter-spacing: 0.02em;
-  width: 132px;
+  width: 18.4%;
 }
 
 th.corner {
   background: color-mix(in srgb, var(--color-primary) 35%, white);
-  width: 60px;
+  width: 8%;
 }
 
 .period-cell {
   background: var(--color-primary-softer);
   font-weight: 700;
   color: var(--color-text-muted);
-  width: 60px;
+  width: 8%;
   padding: 8px 4px;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -251,8 +252,8 @@ th.corner {
 }
 
 .class-cell {
-  height: 80px;
-  width: 150px;
+  height: 92px;
+  width: 18.4%;
   cursor: pointer;
   vertical-align: middle;
   transition: background 0.15s ease;
@@ -265,19 +266,19 @@ th.corner {
 
 .class-cell .class-name {
   display: block;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-strong);
-  padding: 4px 6px 0;
+  padding: 6px 8px 0;
   word-break: break-word;
 }
 
 .class-cell .attendance-rate {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-muted);
-  padding: 2px 6px 4px;
+  padding: 2px 8px 6px;
 }
 
 body[data-period-time-size="large"] .period-time {
@@ -311,6 +312,61 @@ body[data-attendance-size="hidden"] .attendance-rate {
 .class-cell .placeholder {
   color: var(--color-text-faint);
   font-size: 20px;
+}
+
+.table-size-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 6px 4px 0;
+}
+
+.table-size-toggle-btn {
+  border: none;
+  background: none;
+  color: var(--color-text-faint);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.table-size-toggle-btn:hover {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+}
+
+/* 時間割を以前のコンパクトな表示に戻す */
+body[data-table-size="compact"] .app {
+  max-width: 900px;
+}
+
+body[data-table-size="compact"] thead th {
+  padding: 10px 0;
+  font-size: 15px;
+  width: 132px;
+}
+
+body[data-table-size="compact"] th.corner {
+  width: 60px;
+}
+
+body[data-table-size="compact"] .period-cell {
+  width: 60px;
+}
+
+body[data-table-size="compact"] .class-cell {
+  height: 80px;
+  width: 150px;
+}
+
+body[data-table-size="compact"] .class-cell .class-name {
+  font-size: 15px;
+  padding: 4px 6px 0;
+}
+
+body[data-table-size="compact"] .class-cell .attendance-rate {
+  font-size: 12px;
+  padding: 2px 6px 4px;
 }
 
 @media (max-width: 640px) {
