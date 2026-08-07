@@ -186,6 +186,7 @@ h1 {
 
 .table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -195,6 +196,7 @@ h1 {
 
 table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -211,10 +213,12 @@ thead th {
   padding: 10px 0;
   font-weight: 700;
   letter-spacing: 0.02em;
+  width: 132px;
 }
 
 th.corner {
   background: color-mix(in srgb, var(--color-primary) 35%, white);
+  width: 60px;
 }
 
 .period-cell {
@@ -307,6 +311,54 @@ body[data-attendance-size="hidden"] .attendance-rate {
 .class-cell .placeholder {
   color: var(--color-text-faint);
   font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 12px;
+  }
+
+  table {
+    min-width: 784px;
+  }
+
+  thead th {
+    width: 144px;
+    font-size: 15px;
+  }
+
+  th.corner {
+    width: 64px;
+  }
+
+  .period-cell {
+    width: 64px;
+  }
+
+  .period-label {
+    font-size: 15px;
+  }
+
+  .period-time {
+    font-size: 11px;
+  }
+
+  .class-cell {
+    height: 96px;
+  }
+
+  .class-cell .class-name {
+    font-size: 17px;
+    padding-top: 6px;
+  }
+
+  .class-cell .attendance-rate {
+    font-size: 13px;
+  }
+
+  .class-cell .placeholder {
+    font-size: 24px;
+  }
 }
 
 /* モーダル */
