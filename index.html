@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大学生の時間割</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <div id="storage-warning" class="storage-warning hidden">
+      ⚠️ このブラウザでは入力内容を保存できていない可能性があります。プライベートブラウジングモードや、閲覧データの自動削除設定をご確認ください。
+    </div>
+
+    <!-- 時間割ページ -->
+    <div id="page-timetable" class="page">
+      <div class="top-bar">
+        <button id="open-settings-btn" class="top-bar-btn">⚙ 設定</button>
+        <button id="open-help-btn" class="top-bar-btn">❔ 使い方</button>
+      </div>
+
+      <div class="title-row">
+        <span class="title-prefix-wrap">
+          <input type="text" id="title-prefix-input" class="title-prefix-input" placeholder="◯◯" maxlength="20">
+          <span id="title-prefix-mirror" class="title-prefix-mirror" aria-hidden="true"></span>
+        </span>
+        <h1 class="title-suffix">の時間割</h1>
+      </div>
+
+      <div class="dashboard">
+        <div class="dashboard-col dashboard-left">
+          <div class="dashboard-btn-row">
+            <button id="open-todo-btn" class="dashboard-btn"><span class="btn-icon">📝</span><span>課題管理（TODOリスト）</span></button>
+          </div>
+          <div class="dashboard-btn-row dashboard-btn-row-split">
+            <button id="open-past-exams-btn" class="dashboard-btn"><span class="btn-icon">📄</span><span>過去問へ</span></button>
+            <button id="open-university-btn" class="dashboard-btn"><span class="btn-icon">🏫</span><span id="university-btn-label">大学公式サイトへ</span></button>
+            <button id="edit-university-btn" class="icon-btn" title="設定">✎</button>
+          </div>
+        </div>
+        <div class="dashboard-col dashboard-right">
+          <div class="exam-panel">
+            <div class="exam-panel-head">
+              <h2 class="exam-panel-title">テストが近い科目</h2>
+              <button id="open-exams-btn" class="link-btn">すべて見る →</button>
+            </div>
+            <ul id="exam-preview-list" class="exam-list exam-list-preview"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="timetable">
+          <thead>
+            <tr>
+              <th class="corner"></th>
+              <th>月</th>
+              <th>火</th>
+              <th>水</th>
+              <th>木</th>
+              <th>金</th>
+            </tr>
+          </thead>
+          <tbody id="timetable-body">
+            <!-- JSで1〜5限の行を生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="save-section">
+        <h3>この時間割を保存</h3>
+        <div class="save-row">
+          <input type="text" id="save-grade-input" placeholder="学年（例：2年）" maxlength="20">
+          <input type="text" id="save-term-input" placeholder="ターム（例：秋ターム）" maxlength="20">
+          <button id="save-timetable-btn" class="btn btn-primary">保存</button>
+        </div>
+        <h3>保存した時間割</h3>
+        <ul id="saved-timetable-list" class="saved-timetable-list"></ul>
+
+        <h3>共有された時間割を読み込む</h3>
+        <p class="settings-hint">友達から受け取ったファイルやテキストを読み込むと、「保存した時間割」の一覧に追加されます。</p>
+        <div class="share-import-row">
+          <button id="import-file-btn" class="btn btn-secondary btn-sm">📁 ファイルを選択して読み込む</button>
+          <input type="file" id="import-file-input" accept="application/json,.json" class="hidden">
+        </div>
+        <div class="share-import-row">
+          <textarea id="import-text-input" class="import-textarea" placeholder="共有された時間割のテキストをここに貼り付け"></textarea>
+          <button id="import-text-btn" class="btn btn-secondary btn-sm">貼り付けて読み込む</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- テストが近い科目ページ -->
+    <div id="page-exams" class="page hidden">
+      <div class="page-header">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+        <h2>テストが近い科目</h2>
+      </div>
+      <ul id="exam-full-list" class="exam-list"></ul>
+    </div>
+
+    <!-- 課題管理（TODOリスト）ページ -->
+    <div id="page-todo" class="page hidden">
+      <div class="page-header">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+        <h2>課題管理（TODOリスト）</h2>
+      </div>
+      <div class="todo-add-row">
+        <input type="text" id="todo-title-input" placeholder="例：レポート提出" maxlength="60">
+        <input type="date" id="todo-due-input">
+        <button id="add-todo-btn" class="btn btn-primary">追加</button>
+      </div>
+      <ul id="todo-list" class="todo-list"></ul>
+    </div>
+
+    <!-- 設定ページ -->
+    <div id="page-settings" class="page hidden">
+      <div class="page-header">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+        <h2>設定</h2>
+      </div>
+      <div class="settings-content">
+        <section class="settings-section">
+          <h3>テーマカラー</h3>
+          <div id="theme-swatch-row" class="theme-swatch-row"></div>
+        </section>
+
+        <section class="settings-section">
+          <h3>フォント</h3>
+          <div id="font-radio-row" class="settings-radio-row"></div>
+        </section>
+
+        <section class="settings-section">
+          <h3>時刻の表示形式</h3>
+          <div class="settings-radio-row">
+            <label class="settings-radio">
+              <input type="radio" name="time-format" id="time-format-24" value="24">
+              24時間表示（例：14:40）
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="time-format" id="time-format-12" value="12">
+              12時間表示（例：午後2:40）
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>出席率の文字サイズ</h3>
+          <div class="settings-radio-row">
+            <label class="settings-radio">
+              <input type="radio" name="attendance-size" id="attendance-size-large" value="large">
+              大
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="attendance-size" id="attendance-size-medium" value="medium">
+              中
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="attendance-size" id="attendance-size-small" value="small">
+              小
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="attendance-size" id="attendance-size-hidden" value="hidden">
+              表示しない
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>授業時間の文字サイズ</h3>
+          <div class="settings-radio-row">
+            <label class="settings-radio">
+              <input type="radio" name="period-time-size" id="period-time-size-large" value="large">
+              大
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="period-time-size" id="period-time-size-medium" value="medium">
+              中
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="period-time-size" id="period-time-size-small" value="small">
+              小
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="period-time-size" id="period-time-size-hidden" value="hidden">
+              表示しない
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>ボタンのアイコン表示</h3>
+          <p class="settings-hint">「課題管理」「過去問へ」「大学公式サイトへ」ボタンの絵文字アイコンの表示・非表示です。</p>
+          <div class="settings-radio-row">
+            <label class="settings-radio">
+              <input type="radio" name="show-icons" id="show-icons-show" value="show">
+              表示する
+            </label>
+            <label class="settings-radio">
+              <input type="radio" name="show-icons" id="show-icons-hide" value="hide">
+              表示しない
+            </label>
+          </div>
+        </section>
+      </div>
+      <div class="page-footer">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+      </div>
+    </div>
+
+    <!-- 使い方ガイドページ -->
+    <div id="page-help" class="page hidden">
+      <div class="page-header">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+        <h2>使い方ガイド</h2>
+      </div>
+      <div class="help-content">
+        <section>
+          <h3>基本の使い方</h3>
+          <p>時間割の空いているマス（＋）をクリックすると、その授業の詳細画面が開きます。ここで授業名を入力すると、時間割のマスに授業名が表示されます。同じ画面から、出席状況・試験日程・過去問・メモなど、その授業に関するあらゆる情報をまとめて管理できます。</p>
+        </section>
+        <section>
+          <h3>設定でできること（見た目のカスタマイズ）</h3>
+          <p>画面右上の「⚙ 設定」から、見た目や表示内容を自分好みに変更できます。</p>
+          <p><strong>テーマカラー</strong>：青・紫・緑・ピンク・オレンジから選ぶと、ボタンや見出しなどのアクセントカラーが一括で切り替わります。</p>
+          <p><strong>フォント</strong>：シャープなゴシック・標準的なゴシック・丸ゴシック・明朝体の4種類から選べます。</p>
+          <p><strong>時刻の表示形式</strong>：24時間表示（14:40）と12時間表示（午後2:40）を切り替えられます。時間割の時限の時間や、試験日程の時刻表示の両方に反映されます。</p>
+          <p><strong>出席率の文字サイズ／授業時間の文字サイズ</strong>：時間割のマスに表示される出席率と、1限などの下に表示される時間の文字サイズを、それぞれ独立して「大・中・小・表示しない」から選べます。例えば出席率は大きく、時間は非表示にする、といった組み合わせも可能です。</p>
+          <p><strong>ボタンのアイコン表示</strong>：「課題管理」「過去問へ」「大学公式サイトへ」ボタンの絵文字アイコンを表示するかどうかを選べます。</p>
+          <p>これらの設定はすべて自動的に保存され、次にアプリを開いたときも引き継がれます。</p>
+        </section>
+        <section>
+          <h3>出席・欠席の記録と出席率</h3>
+          <p>授業詳細画面の「出席状況」で出席回数・欠席回数を入力すると、出席率が自動計算され、時間割のマスにも表示されます。入力するたびに自動的に保存されます。</p>
+        </section>
+        <section>
+          <h3>試験日程と「テストが近い科目」</h3>
+          <p>授業詳細画面の「試験日程」で中間試験・期末試験の日時を入力しておくと、時間割トップの「テストが近い科目」欄に、今後予定されている試験が日付の近い順に自動で表示されます。「すべて見る」から全件を確認できます。</p>
+        </section>
+        <section>
+          <h3>授業サイト・過去問</h3>
+          <p>授業詳細画面いちばん上の「（授業名）へ」ボタンから、Moodleなどその授業のサイトのURLを登録・移動できます。「過去問」欄では、その授業の過去問のタイトルとURL（任意）を何件でも追加・削除できます。</p>
+        </section>
+        <section>
+          <h3>同じ授業が週に複数コマある場合の「同期」機能</h3>
+          <p>たとえば同じ授業が月曜1限と木曜3限の週2回ある場合、出席状況や試験日程を毎回2か所に入力するのは大変です。そこで、授業名を入力したときに<strong>同じ名前の授業が時間割内に他にもある場合、自動で「同期しますか？」という確認が表示されます。</strong></p>
+          <p>「同期する」を選ぶと、<strong>どの項目を同期するかを個別に選べます</strong>（例：出席状況は同期するけれど、試験日程は同期しない、といった組み合わせも可能です）。同期する項目としてチェックを入れた項目は、以後どちらのコマで編集しても、同じ名前を持つすべてのコマに自動的に反映されます。逆にチェックを外した項目は、コマごとに別々の内容として管理されます。</p>
+          <p>同期の設定は授業名ごとに保存されるので、後から3コマ目に同じ授業名を入力した場合も、既存の同期設定に合わせて確認が表示されます。すでに同期しているコマを開くと、授業詳細画面のいちばん下に同期設定の欄が表示され、あとから同期する項目を変更したり、同期そのものを解除したりできます。</p>
+        </section>
+        <section>
+          <h3>メモ</h3>
+          <p>授業詳細画面のいちばん下にある「メモ」欄には、持ち物や座席、レポートの注意点など、自由に文章を書き残せます。</p>
+        </section>
+        <section>
+          <h3>コマ（1限・2限…）の時間設定</h3>
+          <p>時間割の「1限」などの表示をクリックすると、その時限の開始・終了時刻を編集できます。この時間設定は特定のタームの時間割だけでなく、<strong>他の学年・タームの時間割を新しく作ったり読み込んだりしたときにも共通して保持されます</strong>（時限の時間は年間を通じて変わらないことが多いためです）。</p>
+        </section>
+        <section>
+          <h3>課題管理（TODOリスト）</h3>
+          <p>時間割トップの「📝 課題管理（TODOリスト）」ボタンから、レポートなどの課題を期限つきで管理できます。期限が近い・過ぎている課題は色付きで強調表示されるので、優先度がひと目でわかります。</p>
+        </section>
+        <section>
+          <h3>過去問へのリンク・大学公式サイト</h3>
+          <p>「📄 過去問へ」ボタンからは、授業を横断した過去問置き場（サークルの共有フォルダなど）へのリンクを、名前をつけて複数登録できます。「🏫 大学公式サイトへ」ボタンでは、大学の公式サイトなどよく使うリンクを1件、ボタンに表示する名前とあわせて登録できます。</p>
+        </section>
+        <section>
+          <h3>時間割のタイトル・学年やタームごとの保存</h3>
+          <p>見出しの左側の空欄に好きな文字を入れると「〇〇の時間割」のように表示をカスタマイズできます。また、時間割は四半期（ターム）ごとに変わることが多いため、時間割の下にある「保存」から学年・タームを入力して現在の時間割を保存し、後から一覧の「読み込む」で呼び出せます（読み込むと現在の内容は上書きされます）。</p>
+        </section>
+        <section>
+          <h3>時間割を友達と共有する</h3>
+          <p>「保存した時間割」の一覧にある各項目の「共有」ボタンを押すと、共有用のURLが発行されます。「🔗 共有用URLをコピー」でリンクをコピーし、LINEなどで友達に送ってください。友達がスマホなどでそのリンクを開くと、このアプリが表示され「保存した時間割の一覧に追加しますか？」と確認が出ます。追加された時間割は、相手の「保存した時間割」一覧から「読み込む」で反映できます（自動的に上書きされることはありません）。</p>
+          <p>リンクがうまく開けない場合は、同じ画面のテキストをコピーして送り、「共有された時間割を読み込む」の貼り付け欄で読み込んでもらうこともできます。ファイルとして受け取った場合は「ファイルを選択して読み込む」からも取り込めます。</p>
+        </section>
+        <section>
+          <h3>データの保存について</h3>
+          <p>入力したデータはすべてこのブラウザの中（localStorage）に保存されます。ページを閉じたり再読み込みしたりしても消えませんが、別のブラウザやパソコン・スマートフォンとは共有されない点にご注意ください。</p>
+        </section>
+      </div>
+      <div class="page-footer">
+        <button class="back-btn" data-back>← 時間割に戻る</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 授業詳細モーダル -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal detail-modal">
+      <div class="modal-header">
+        <span id="modal-subtitle" class="modal-subtitle"></span>
+
+        <div id="name-display-row" class="name-row hidden">
+          <h2 id="name-display" class="name-display"></h2>
+          <button id="edit-name-btn" class="icon-btn" title="授業名を編集">✎</button>
+        </div>
+        <div id="name-edit-row" class="name-edit-row hidden">
+          <input type="text" id="name-edit-input" maxlength="30" placeholder="例：線形代数">
+          <button id="name-save-btn" class="btn btn-primary btn-sm">保存</button>
+          <button id="name-cancel-btn" class="btn btn-secondary btn-sm">取消</button>
+        </div>
+      </div>
+
+      <div class="modal-section modal-section-top">
+        <div id="url-view-row" class="url-row">
+          <a id="moodle-link" class="btn btn-moodle hidden" href="#" target="_blank" rel="noopener noreferrer">へ ↗</a>
+          <span id="url-unset-label" class="url-unset-label">URL未設定</span>
+          <button id="edit-url-btn" class="icon-btn" title="URLを編集">✎</button>
+        </div>
+        <div id="url-edit-row" class="url-edit-row hidden">
+          <input type="text" id="url-edit-input" placeholder="https://...">
+          <button id="url-save-btn" class="btn btn-primary btn-sm">保存</button>
+          <button id="url-cancel-btn" class="btn btn-secondary btn-sm">取消</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>出席状況</h3>
+        <div class="attendance-row">
+          <label class="count-label">出席
+            <input type="number" id="attended-input" min="0" step="1" value="0">
+          </label>
+          <label class="count-label">欠席
+            <input type="number" id="absent-input" min="0" step="1" value="0">
+          </label>
+        </div>
+        <div id="rate-preview" class="rate-preview"></div>
+      </div>
+
+      <div class="modal-section">
+        <h3>試験日程</h3>
+        <label class="exam-date-label">中間試験
+          <input type="datetime-local" id="midterm-input">
+        </label>
+        <label class="exam-date-label">期末試験
+          <input type="datetime-local" id="final-input">
+        </label>
+      </div>
+
+      <div class="modal-section">
+        <h3>過去問</h3>
+        <ul id="past-exam-list" class="past-exam-list"></ul>
+        <div class="past-exam-add">
+          <input type="text" id="past-exam-title-input" placeholder="例：2023年度期末試験" maxlength="40">
+          <input type="text" id="past-exam-url-input" placeholder="URL（任意）">
+          <button id="add-past-exam-btn" class="btn btn-secondary btn-sm">追加</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>メモ</h3>
+        <textarea id="memo-input" class="memo-textarea" maxlength="500" placeholder="持ち物や座席などを自由にメモできます"></textarea>
+      </div>
+
+      <div id="sync-status-section" class="modal-section hidden">
+        <h3>同期設定</h3>
+        <p id="sync-status-desc" class="sync-status-desc"></p>
+        <div class="sync-field-list">
+          <label class="sync-field-option">
+            <input type="checkbox" id="sync-edit-attendance">
+            出席状況（出席・欠席回数）
+          </label>
+          <label class="sync-field-option">
+            <input type="checkbox" id="sync-edit-exam">
+            試験日程（中間・期末）
+          </label>
+          <label class="sync-field-option">
+            <input type="checkbox" id="sync-edit-url">
+            授業サイトURL
+          </label>
+          <label class="sync-field-option">
+            <input type="checkbox" id="sync-edit-pastexams">
+            過去問
+          </label>
+          <label class="sync-field-option">
+            <input type="checkbox" id="sync-edit-memo">
+            メモ
+          </label>
+        </div>
+        <button id="unsync-btn" class="btn btn-secondary btn-sm">この授業の同期を解除</button>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="clear-btn" class="btn btn-secondary">この枠をクリア</button>
+        <button id="close-btn" class="btn btn-primary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 大学公式サイト設定モーダル -->
+  <div id="university-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>大学公式サイト</h2>
+      <div class="form-field">
+        <label for="university-label-input">ボタンに表示する名前</label>
+        <input type="text" id="university-label-input" placeholder="例：大学公式サイト" maxlength="20">
+      </div>
+      <div class="form-field">
+        <label for="university-url-input">URL</label>
+        <input type="text" id="university-url-input" placeholder="https://...">
+      </div>
+      <div class="modal-buttons">
+        <button id="university-cancel-btn" class="btn btn-secondary">キャンセル</button>
+        <button id="university-save-btn" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 過去問リンク管理モーダル -->
+  <div id="past-exam-links-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>過去問へのリンク</h2>
+      <ul id="past-exam-links-list" class="past-exam-list"></ul>
+      <div class="past-exam-add">
+        <input type="text" id="past-exam-link-name-input" placeholder="名前（例：先輩の過去問）" maxlength="20">
+        <input type="text" id="past-exam-link-url-input" placeholder="URL">
+        <button id="add-past-exam-link-btn" class="btn btn-secondary btn-sm">追加</button>
+      </div>
+      <div class="modal-buttons">
+        <button id="past-exam-links-close-btn" class="btn btn-primary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時限の時間設定モーダル -->
+  <div id="period-time-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="period-time-modal-title">時限の時間</h2>
+      <div class="form-field">
+        <label for="period-start-input">開始時刻</label>
+        <input type="time" id="period-start-input">
+      </div>
+      <div class="form-field">
+        <label for="period-end-input">終了時刻</label>
+        <input type="time" id="period-end-input">
+      </div>
+      <div class="modal-buttons">
+        <button id="period-time-cancel-btn" class="btn btn-secondary">キャンセル</button>
+        <button id="period-time-save-btn" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 授業の同期確認モーダル -->
+  <div id="sync-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>授業を同期しますか？</h2>
+      <p id="sync-modal-desc" class="sync-modal-desc"></p>
+      <div class="sync-field-list">
+        <label class="sync-field-option">
+          <input type="checkbox" id="sync-field-attendance" checked>
+          出席状況（出席・欠席回数）
+        </label>
+        <label class="sync-field-option">
+          <input type="checkbox" id="sync-field-exam">
+          試験日程（中間・期末）
+        </label>
+        <label class="sync-field-option">
+          <input type="checkbox" id="sync-field-url" checked>
+          授業サイトURL
+        </label>
+        <label class="sync-field-option">
+          <input type="checkbox" id="sync-field-pastexams" checked>
+          過去問
+        </label>
+        <label class="sync-field-option">
+          <input type="checkbox" id="sync-field-memo">
+          メモ
+        </label>
+      </div>
+      <p class="sync-modal-note">チェックした項目のみ、同じ名前のコマ同士で内容が自動的にそろうようになります。</p>
+      <div class="modal-buttons">
+        <button id="sync-decline-btn" class="btn btn-secondary">同期しない</button>
+        <button id="sync-confirm-btn" class="btn btn-primary">選択した項目を同期する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時間割の共有モーダル -->
+  <div id="share-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>時間割を共有</h2>
+      <p class="share-modal-desc">下のURLを相手に送ってください。相手がスマホ等でリンクを開くとこのアプリが表示され、時間割を取り込むか確認が出ます。</p>
+      <input type="text" id="share-url-output" class="share-url-output" readonly>
+      <button id="share-url-copy-btn" class="btn btn-primary share-download-btn">🔗 共有用URLをコピー</button>
+      <p class="share-modal-note">URLがうまく開けない場合は、下のテキストをコピーして送り、相手に「共有された時間割を読み込む」の貼り付け欄で読み込んでもらうこともできます。</p>
+      <textarea id="share-text-output" class="import-textarea" readonly></textarea>
+      <button id="share-copy-btn" class="btn btn-secondary btn-sm">📋 テキストをコピー</button>
+      <div class="modal-buttons">
+        <button id="share-close-btn" class="btn btn-primary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
