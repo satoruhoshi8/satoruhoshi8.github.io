@@ -1496,6 +1496,32 @@ function fromBase64Url(value) {
   return new TextDecoder().decode(bytes);
 }
 
+function compactClassEntry(entry) {
+  entry = entry || {};
+  const compact = {};
+  if (entry.name) compact.name = entry.name;
+  if (entry.url) compact.url = entry.url;
+  if (entry.attended) compact.attended = entry.attended;
+  if (entry.absent) compact.absent = entry.absent;
+  if (entry.examMidterm) compact.examMidterm = entry.examMidterm;
+  if (entry.examFinal) compact.examFinal = entry.examFinal;
+  if (Array.isArray(entry.pastExams) && entry.pastExams.length) compact.pastExams = entry.pastExams;
+  if (entry.memo) compact.memo = entry.memo;
+  if (entry.syncEnabled) compact.syncEnabled = true;
+  return compact;
+}
+
+function compactClassesMap(classesMap) {
+  const compact = {};
+  Object.keys(classesMap || {}).forEach((key) => {
+    const entry = compactClassEntry(classesMap[key]);
+    if (Object.keys(entry).length > 0) {
+      compact[key] = entry;
+    }
+  });
+  return compact;
+}
+
 function buildShareObject(entry) {
   return {
     type: "my-timetable-share",
@@ -1503,7 +1529,7 @@ function buildShareObject(entry) {
     grade: entry.grade,
     term: entry.term,
     titlePrefix: entry.titlePrefix,
-    classes: entry.classes,
+    classes: compactClassesMap(entry.classes),
     syncSettings: entry.syncSettings,
   };
 }
