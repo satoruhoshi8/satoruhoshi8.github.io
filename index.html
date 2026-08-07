@@ -82,11 +82,7 @@
         <ul id="saved-timetable-list" class="saved-timetable-list"></ul>
 
         <h3>共有された時間割を読み込む</h3>
-        <p class="settings-hint">友達から受け取ったファイルやテキストを読み込むと、「保存した時間割」の一覧に追加されます。</p>
-        <div class="share-import-row">
-          <button id="import-file-btn" class="btn btn-secondary btn-sm">📁 ファイルを選択して読み込む</button>
-          <input type="file" id="import-file-input" accept="application/json,.json" class="hidden">
-        </div>
+        <p class="settings-hint">友達から届いた共有URLを開くと、自動的に「保存した時間割」の一覧に追加するか確認が表示されます。リンクが開けない場合は、共有されたテキストを下に貼り付けて読み込むこともできます。</p>
         <div class="share-import-row">
           <textarea id="import-text-input" class="import-textarea" placeholder="共有された時間割のテキストをここに貼り付け"></textarea>
           <button id="import-text-btn" class="btn btn-secondary btn-sm">貼り付けて読み込む</button>
@@ -273,8 +269,8 @@
         </section>
         <section>
           <h3>時間割を友達と共有する</h3>
-          <p>「保存した時間割」の一覧にある各項目の「共有」ボタンを押すと、共有用のURLが発行されます。「🔗 共有用URLをコピー」でリンクをコピーし、LINEなどで友達に送ってください。友達がスマホなどでそのリンクを開くと、このアプリが表示され「保存した時間割の一覧に追加しますか？」と確認が出ます。追加された時間割は、相手の「保存した時間割」一覧から「読み込む」で反映できます（自動的に上書きされることはありません）。</p>
-          <p>リンクがうまく開けない場合は、同じ画面のテキストをコピーして送り、「共有された時間割を読み込む」の貼り付け欄で読み込んでもらうこともできます。ファイルとして受け取った場合は「ファイルを選択して読み込む」からも取り込めます。</p>
+          <p>「保存した時間割」の一覧にある各項目の「共有」ボタンを押すと、共有用のURLが発行されます。スマホでは「📤 共有する」ボタンをタップすると、LINEやメッセージアプリの共有メニューが直接開くので、そこから友達に送るだけで完了します（対応していない環境ではこのボタンは表示されません）。共有メニューが使えないパソコンなどでは「🔗 URLをコピー」でリンクをコピーして貼り付けて送ってください。</p>
+          <p>友達がそのリンクを開くと、このアプリが表示され「保存した時間割の一覧に追加しますか？」と確認が出ます。追加された時間割は、相手の「保存した時間割」一覧から「読み込む」で反映できます（自動的に上書きされることはありません）。リンクがうまく開けない場合は、共有画面のテキストをコピーして送り、「共有された時間割を読み込む」の貼り付け欄で読み込んでもらうこともできます。</p>
         </section>
         <section>
           <h3>データの保存について</h3>
@@ -485,8 +481,9 @@
     <div class="modal">
       <h2>時間割を共有</h2>
       <p class="share-modal-desc">下のURLを相手に送ってください。相手がスマホ等でリンクを開くとこのアプリが表示され、時間割を取り込むか確認が出ます。</p>
+      <button id="share-native-btn" class="btn btn-primary share-download-btn hidden">📤 共有する</button>
       <input type="text" id="share-url-output" class="share-url-output" readonly>
-      <button id="share-url-copy-btn" class="btn btn-primary share-download-btn">🔗 共有用URLをコピー</button>
+      <button id="share-url-copy-btn" class="btn btn-secondary share-download-btn">🔗 URLをコピー</button>
       <p class="share-modal-note">URLがうまく開けない場合は、下のテキストをコピーして送り、相手に「共有された時間割を読み込む」の貼り付け欄で読み込んでもらうこともできます。</p>
       <textarea id="share-text-output" class="import-textarea" readonly></textarea>
       <button id="share-copy-btn" class="btn btn-secondary btn-sm">📋 テキストをコピー</button>

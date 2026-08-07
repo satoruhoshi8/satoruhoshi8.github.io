@@ -82,12 +82,11 @@ const saveTermInput = document.getElementById("save-term-input");
 const saveTimetableBtn = document.getElementById("save-timetable-btn");
 const savedTimetableListEl = document.getElementById("saved-timetable-list");
 
-const importFileBtn = document.getElementById("import-file-btn");
-const importFileInput = document.getElementById("import-file-input");
 const importTextInput = document.getElementById("import-text-input");
 const importTextBtn = document.getElementById("import-text-btn");
 
 const shareModalOverlay = document.getElementById("share-modal-overlay");
+const shareNativeBtn = document.getElementById("share-native-btn");
 const shareUrlOutput = document.getElementById("share-url-output");
 const shareUrlCopyBtn = document.getElementById("share-url-copy-btn");
 const shareTextOutput = document.getElementById("share-text-output");
@@ -1523,8 +1522,9 @@ function openShareModal(entryId) {
   shareModalEntryId = entryId;
   shareUrlOutput.value = buildShareUrl(entry);
   shareTextOutput.value = JSON.stringify(buildShareObject(entry), null, 2);
-  shareUrlCopyBtn.textContent = "🔗 共有用URLをコピー";
+  shareUrlCopyBtn.textContent = "🔗 URLをコピー";
   shareCopyBtn.textContent = "📋 テキストをコピー";
+  shareNativeBtn.classList.toggle("hidden", typeof navigator.share !== "function");
   shareModalOverlay.classList.remove("hidden");
 }
 
@@ -1553,8 +1553,22 @@ async function copyTextToField(field, button, defaultLabel) {
   }, 1500);
 }
 
+shareNativeBtn.addEventListener("click", async () => {
+  const entry = savedTimetables.find((e) => e.id === shareModalEntryId);
+  const label = (entry && [entry.grade, entry.term].filter(Boolean).join(" ")) || "時間割";
+  try {
+    await navigator.share({
+      title: `${label}の時間割`,
+      text: `${label}の時間割を共有します`,
+      url: shareUrlOutput.value,
+    });
+  } catch (e) {
+    // ユーザーがキャンセルした場合などは何もしない
+  }
+});
+
 shareUrlCopyBtn.addEventListener("click", () => {
-  copyTextToField(shareUrlOutput, shareUrlCopyBtn, "🔗 共有用URLをコピー");
+  copyTextToField(shareUrlOutput, shareUrlCopyBtn, "🔗 URLをコピー");
 });
 
 shareCopyBtn.addEventListener("click", () => {
@@ -1650,19 +1664,6 @@ function handleIncomingShareLink() {
     window.alert(`「${label}」を追加しました。「保存した時間割」の一覧から読み込んでください。`);
   }
 }
-
-importFileBtn.addEventListener("click", () => importFileInput.click());
-
-importFileInput.addEventListener("change", () => {
-  const file = importFileInput.files && importFileInput.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    importShareData(String(reader.result || ""));
-    importFileInput.value = "";
-  };
-  reader.readAsText(file);
-});
 
 importTextBtn.addEventListener("click", () => {
   const text = importTextInput.value.trim();
